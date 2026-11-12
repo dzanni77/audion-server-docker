@@ -337,11 +337,7 @@ pub async fn update_track_metadata_inner(
 
     // Fetch the updated track
     let track = sqlx::query_as::<_, TrackResponse>(
-        "SELECT id, path, title, artist, album, album_artist, composer, year, track_number, disc_number, duration,
-                album_id, format, bitrate, source_type, cover_url, external_id,
-                local_src, track_cover_path, genre, comment, bpm, isrc, lyrics, metadata_json, date_added
-         FROM tracks
-         WHERE id = ?"
+        &track_select_sql("WHERE id = ?")
     )
     .bind(id)
     .fetch_one(&user_pool)
@@ -668,11 +664,7 @@ pub async fn fetch_track_metadata_inner(
 
     // Get the updated track
     let track = sqlx::query_as::<_, TrackResponse>(
-        "SELECT id, path, title, artist, album, album_artist, composer, year, track_number, disc_number, duration,
-                album_id, format, bitrate, source_type, cover_url, external_id,
-                local_src, track_cover_path, genre, comment, bpm, isrc, lyrics, metadata_json, date_added
-         FROM tracks
-         WHERE id = ?"
+        &track_select_sql("WHERE id = ?")
     )
     .bind(id)
     .fetch_one(pool)

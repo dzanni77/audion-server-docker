@@ -5,7 +5,7 @@ use axum::{
 };
 use crate::state::AppState;
 use crate::auth::Claims;
-use crate::api::tracks::TrackResponse;
+use crate::api::tracks::{track_select_aliased_sql, TrackResponse};
 use crate::events::ServerEvent;
 
 pub async fn get_liked_tracks(
@@ -16,13 +16,7 @@ pub async fn get_liked_tracks(
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
     let tracks = sqlx::query_as::<_, TrackResponse>(
-        "SELECT t.id, t.path, t.title, t.artist, t.album, t.track_number, t.disc_number, t.duration,
-                t.album_id, t.format, t.bitrate, t.source_type, t.cover_url, t.external_id,
-                t.local_src, t.track_cover_path, t.genre, t.metadata_json, t.date_added
-         FROM tracks t
-         JOIN liked_tracks lt ON lt.track_id = t.id
-         WHERE lt.user_id = ?
-         ORDER BY lt.liked_at DESC"
+        &track_select_aliased_sql("JOIN liked_tracks lt ON lt.track_id = t.id WHERE lt.user_id = ? ORDER BY lt.liked_at DESC")
     )
     .bind(&claims.sub)
     .fetch_all(&user_pool)

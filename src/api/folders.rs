@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 use crate::state::AppState;
 use crate::auth::Claims;
-use crate::api::tracks::TrackResponse;
+use crate::api::tracks::{track_select_sql, TrackResponse};
 
 #[derive(Deserialize)]
 pub struct FolderQuery {
@@ -105,11 +105,7 @@ pub async fn list_folder(
             if audio_extensions.contains(&ext.as_str()) {
                 // Try looking up track metadata in DB
                 let track = sqlx::query_as::<_, TrackResponse>(
-                    "SELECT id, path, title, artist, album, album_artist, composer, year, track_number, disc_number, duration,
-                            album_id, format, bitrate, source_type, cover_url, external_id,
-                            local_src, track_cover_path, genre, comment, bpm, isrc, lyrics, metadata_json, date_added
-                     FROM tracks
-                     WHERE path = ?"
+                    &track_select_sql("WHERE path = ?")
                 )
                 .bind(&relative_to_data)
                 .fetch_optional(&user_pool)

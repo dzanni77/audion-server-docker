@@ -15,7 +15,7 @@ use crate::state::{AppState, ScanStatus, FetcherStatus};
 use crate::auth::Claims;
 use crate::scanner::extract_metadata;
 use crate::events::ServerEvent;
-use crate::api::tracks::TrackResponse;
+use crate::api::tracks::{track_select_sql, TrackResponse};
 
 pub mod scan;
 pub mod fetch;

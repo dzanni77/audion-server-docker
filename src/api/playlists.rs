@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use crate::state::AppState;
 use crate::auth::Claims;
-use crate::api::tracks::TrackResponse;
+use crate::api::tracks::{track_select_aliased_sql, TrackResponse};
 use crate::events::ServerEvent;
 use sqlx::Row;
 
@@ -238,13 +238,7 @@ pub async fn get_playlist_tracks(
         .ok_or((StatusCode::NOT_FOUND, "Playlist not found".to_string()))?;
 
     let tracks = sqlx::query_as::<_, TrackResponse>(
-        "SELECT t.id, t.path, t.title, t.artist, t.album, t.track_number, t.disc_number, t.duration,
-                t.album_id, t.format, t.bitrate, t.source_type, t.cover_url, t.external_id,
-                t.local_src, t.track_cover_path, t.genre, t.metadata_json, t.date_added
-         FROM tracks t
-         JOIN playlist_tracks pt ON pt.track_id = t.id
-         WHERE pt.playlist_id = ?
-         ORDER BY pt.position, t.date_added"
+        &track_select_aliased_sql("JOIN playlist_tracks pt ON pt.track_id = t.id WHERE pt.playlist_id = ? ORDER BY pt.position, t.date_added")
     )
     .bind(id)
     .fetch_all(&user_pool)

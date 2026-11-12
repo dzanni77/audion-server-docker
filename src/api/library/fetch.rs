@@ -474,11 +474,7 @@ pub async fn start_metadata_fetcher(
 
                             // Broadcast track.updated
                             if let Ok(track) = sqlx::query_as::<_, TrackResponse>(
-                                "SELECT id, path, title, artist, album, track_number, disc_number, duration,
-                                        album_id, format, bitrate, source_type, cover_url, external_id,
-                                        local_src, track_cover_path, genre, metadata_json, date_added
-                                 FROM tracks
-                                 WHERE id = ?"
+                                &track_select_sql("WHERE id = ?")
                             )
                             .bind(track_id)
                             .fetch_one(&pool)
@@ -634,11 +630,7 @@ pub async fn start_metadata_fetcher(
 
                                         // Broadcast track.updated
                                         if let Ok(track) = sqlx::query_as::<_, TrackResponse>(
-                                            "SELECT id, path, title, artist, album, track_number, disc_number, duration,
-                                                    album_id, format, bitrate, source_type, cover_url, external_id,
-                                                    local_src, track_cover_path, genre, metadata_json, date_added
-                                             FROM tracks
-                                             WHERE id = ?"
+                                            &track_select_sql("WHERE id = ?")
                                         )
                                         .bind(track_id)
                                         .fetch_one(&pool)

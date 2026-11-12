@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use crate::state::AppState;
 use crate::auth::Claims;
-use crate::api::tracks::TrackResponse;
+use crate::api::tracks::{track_select_sql, TrackResponse};
 use crate::api::albums::AlbumResponse;
 use crate::api::artists::ArtistResponse;
 
@@ -34,13 +34,7 @@ pub async fn search(
 
     // Search tracks
     let tracks = sqlx::query_as::<_, TrackResponse>(
-        "SELECT id, path, title, artist, album, track_number, disc_number, duration,
-                album_id, format, bitrate, source_type, cover_url, external_id,
-                local_src, track_cover_path, genre, metadata_json, date_added
-         FROM tracks
-         WHERE title LIKE ? OR artist LIKE ? OR album LIKE ? OR genre LIKE ?
-         ORDER BY artist, album, disc_number, track_number, title
-         LIMIT 50"
+        &track_select_sql("WHERE title LIKE ? OR artist LIKE ? OR album LIKE ? OR genre LIKE ? ORDER BY artist, album, disc_number, track_number, title LIMIT 50")
     )
     .bind(&search_pattern)
     .bind(&search_pattern)

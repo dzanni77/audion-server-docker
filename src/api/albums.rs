@@ -7,7 +7,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use crate::state::AppState;
 use crate::auth::Claims;
-use crate::api::tracks::{PaginatedQuery, TrackResponse};
+use crate::api::tracks::{track_select_sql, PaginatedQuery, TrackResponse};
 use sqlx::Row;
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
@@ -73,12 +73,7 @@ pub async fn get_album_tracks(
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
 
     let tracks = sqlx::query_as::<_, TrackResponse>(
-        "SELECT id, path, title, artist, album, track_number, disc_number, duration,
-                album_id, format, bitrate, source_type, cover_url, external_id,
-                local_src, track_cover_path, genre, metadata_json, date_added
-         FROM tracks
-         WHERE album_id = ?
-         ORDER BY disc_number, track_number, title"
+        &track_select_sql("WHERE album_id = ? ORDER BY disc_number, track_number, title")
     )
     .bind(id)
     .fetch_all(&user_pool)
